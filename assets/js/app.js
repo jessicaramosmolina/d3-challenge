@@ -29,6 +29,34 @@ var chartGroup = svg
   .attr("class","main");
 
 // Read CSV
-d3.csv("assets/data/data.csv").then(function(data) {
-    console.log(data);
+d3.csv("assets/data/data.csv").then(function(dataFile) {
+    // console.log(dataFile);
+
+    // parse data
+    dataFile.forEach(function(data) {
+        data.healthcare = +data.healthcare;
+        data.poverty = +data.poverty;
+    });
+
+    // create scales
+    var xLinearScale = d3.scaleLinear()
+        .domain(d3.extent(dataFile, d => d.poverty))
+        .range([0, width]);
+    
+    var yLinearScale = d3.scaleLinear()
+        .domain(d3.extent(dataFile, d => d.healthcare))
+        .range([height, 0]);
+
+    // create axes
+    var xAxis = d3.axisBottom(xLinearScale);
+    var yAxis = d3.axisLeft(yLinearScale).ticks(6);
+
+    // append axes
+    chartGroup.append("g")
+    .attr("transform", `translate(0, ${height})`)
+    .call(xAxis);
+
+  chartGroup.append("g")
+    .call(yAxis);
+
 });
