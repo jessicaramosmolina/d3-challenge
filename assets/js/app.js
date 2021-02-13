@@ -3,8 +3,8 @@
 // automatically resizes the chart
 function makeResponsive() {    
     // Define SVG area dimensions
-    var svgWidth = window.innerWidth;
-    var svgHeight = window.innerHeight;
+    var svgWidth = 1800;
+    var svgHeight = 900;
 
     // Define the chart's margins as an object
     var chartMargin = {
@@ -39,6 +39,7 @@ function makeResponsive() {
         dataFile.forEach(function(data) {
             data.healthcare = +data.healthcare;
             data.poverty = +data.poverty;
+            // console.log(data);
         });
 
         // create scales
@@ -60,19 +61,34 @@ function makeResponsive() {
         .call(xAxis);
 
         chartGroup.append("g")
+        // .attr("transform", `translate(0, ${height})`)
         .call(yAxis);
 
         // append circles
         var circlesGroup = chartGroup.selectAll("circle")
-        .data(medalData)
+        .data(dataFile)
         .enter()
         .append("circle")
         .attr("cx", d => xLinearScale(d.poverty))
         .attr("cy", d => yLinearScale(d.healthcare))
         .attr("r", "10")
-        .attr("fill", "gold")
+        .attr("fill", "red")
         .attr("stroke-width", "1")
-        .attr("stroke", "black");
+        // .attr("stroke", "black");
+
+        // add State abbreviation 
+        chartGroup.selectAll()
+        .data(dataFile)
+        .enter()
+        .append("text")
+        .attr("x", d => xLinearScale(d.poverty))
+        .attr("y", d => yLinearScale(d.healthcare))
+        .text(d => d.abbr)
+        .attr("font-size", "10")
+        .style("fill", "white") 
+        .classed("stateText", true)
+        .attr("opacity", 0.75);
+
 
         // Step 1: Initialize Tooltip
         var toolTip = d3.tip()
@@ -86,13 +102,29 @@ function makeResponsive() {
         chartGroup.call(toolTip);
 
         // Step 3: Create "mouseover" event listener to display tooltip
-        circlesGroup.on("mouseover", function(d) {
+        circlesGroup.on("click", function(d) {
         toolTip.show(d, this);
         })
         // Step 4: Create "mouseout" event listener to hide tooltip
         .on("mouseout", function(d) {
             toolTip.hide(d);
         });
+
+        chartGroup.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - chartMargin.left + 5)
+        .attr("x", 0 - (height / 2))
+        .attr("dy", "16px")
+        .attr("class", "axisText")
+        .classed("active", true)
+        .text("Lacks Healthcare (%)");
+
+        chartGroup.append("text")
+      .attr("transform", `translate(${width / 2}, ${height + chartMargin.top + 7})`)
+      .attr("class", "axisText")
+      .attr("dx", "16px")
+      .text("In Poverty (%)");
+        // .text("In Poverty (%)");
 
     }).catch(function(error) {
         console.log(error)
